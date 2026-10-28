@@ -139,6 +139,10 @@ class Boy:
         half = self.BASE_SIZE * self.scale / 2
         return half, self.SCREEN_WIDTH - half
 
+    def _constrain(self):
+        left, right = self.horizontal_bounds
+        self.x = max(left, self.x)
+
     def update(self, dt):
         if self.state == 'WALK':
             self.speed = self.WALK_SPEED
@@ -155,6 +159,8 @@ class Boy:
 
         elif self.state == 'SLEEP':
             self._animate(dt, fps=2)
+
+        self._constrain()
 
     def draw(self):
         import pico2d as p
