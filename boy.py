@@ -1,6 +1,8 @@
 """Player model, state machine and rendering."""
 from pathlib import Path
 
+from transitions import Machine
+
 
 class Boy:
     BASE_SIZE = 100
@@ -12,6 +14,8 @@ class Boy:
         self.frame = 0
         self.scale = 1.0
         self.image = None
+        self.machine = Machine(model=self, states=['IDLE', 'WALK', 'SLEEP', 'AUTO_RUN'],
+                               initial='IDLE', auto_transitions=False)
 
     def handle_events(self, events):
         self.last_events = events
