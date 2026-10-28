@@ -27,9 +27,10 @@ class Boy:
 
     def handle_events(self, events):
         for key, down in events:
-            if key in ('left', 'right') and down and self.state == 'IDLE':
+            if key in ('left', 'right') and down and self.state in ('IDLE', 'WALK'):
                 self.direction = -1 if key == 'left' else 1
-                self.start_walk()
+                if self.state != 'WALK':
+                    self.start_walk()
 
     def update(self, dt):
         if self.state == 'WALK':
