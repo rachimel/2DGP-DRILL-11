@@ -1,4 +1,5 @@
 """Player model, state machine and rendering."""
+from math import pi
 from pathlib import Path
 
 from transitions import Machine
@@ -79,5 +80,8 @@ class Boy:
         if self.image is None:
             self.image = p.load_image(str(Path(__file__).with_name('animation_sheet.png')))
         row = (101 if self.direction == 1 else 1) if self.state == 'WALK' else (301 if self.direction == 1 else 201)
-        self.image.clip_draw(1 + self.frame * 100, row, 100, 100,
-                             self.x, self.GROUND_Y + 50, 100, 100)
+        sleeping = self.state == 'SLEEP'
+        angle = self.direction * pi / 2 if sleeping else 0.0
+        y = self.GROUND_Y + (20 if sleeping else 37)
+        self.image.clip_composite_draw(1 + self.frame * 100, row, 100, 100,
+                                      angle, '', self.x, y, 100, 100)
