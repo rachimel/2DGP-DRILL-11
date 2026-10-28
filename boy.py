@@ -41,6 +41,7 @@ class Boy:
     def _enter_auto(self):
         self.speed = self.AUTO_START_SPEED
         self.auto_elapsed = 0.0
+        self.scale = 2.0
 
     def handle_events(self, events):
         changed = False
@@ -108,6 +109,7 @@ class Boy:
         row = (101 if self.direction == 1 else 1) if self.state == 'WALK' else (301 if self.direction == 1 else 201)
         sleeping = self.state == 'SLEEP'
         angle = self.direction * pi / 2 if sleeping else 0.0
-        y = self.GROUND_Y + (20 if sleeping else 37)
+        size = self.BASE_SIZE * self.scale
+        y = self.GROUND_Y + (20 if sleeping else 37) * self.scale
         self.image.clip_composite_draw(1 + self.frame * 100, row, 100, 100,
-                                      angle, '', self.x, y, 100, 100)
+                                      angle, '', self.x, y, size, size)
