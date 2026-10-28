@@ -13,6 +13,7 @@ class Boy:
         self.x = 400.0
         self.direction = 1
         self.frame = 0
+        self.held = set()
         self.scale = 1.0
         self.image = None
         self.machine = Machine(model=self, states=['IDLE', 'WALK', 'SLEEP', 'AUTO_RUN'],
@@ -27,10 +28,17 @@ class Boy:
 
     def handle_events(self, events):
         for key, down in events:
+            if down:
+                self.held.add(key)
+            else:
+                self.held.discard(key)
             if key in ('left', 'right') and down and self.state in ('IDLE', 'WALK'):
                 self.direction = -1 if key == 'left' else 1
                 if self.state != 'WALK':
                     self.start_walk()
+
+        if self.state == 'WALK' and not self.held.intersection({'left', 'right'}):
+            self.rest()
 
     def update(self, dt):
         if self.state == 'WALK':
