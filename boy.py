@@ -22,6 +22,7 @@ class Boy:
         self.machine.add_transition('rest', ['WALK', 'AUTO_RUN'], 'IDLE')
         self.machine.get_state('IDLE').add_callback('enter', '_enter_idle')
         self.machine.add_transition('start_walk', 'IDLE', 'WALK')
+        self.machine.add_transition('fall_asleep', 'IDLE', 'SLEEP')
         self._enter_idle()
 
     def _enter_idle(self):
@@ -70,6 +71,8 @@ class Boy:
         elif self.state == 'IDLE':
             self.idle_elapsed += dt
             self._animate(dt)
+            if self.idle_elapsed >= 5.0:
+                self.fall_asleep()
 
     def draw(self):
         import pico2d as p
