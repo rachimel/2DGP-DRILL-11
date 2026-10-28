@@ -25,6 +25,7 @@ class Boy:
         self.machine.get_state('IDLE').add_callback('enter', '_enter_idle')
         self.machine.add_transition('start_walk', ['IDLE', 'SLEEP'], 'WALK')
         self.machine.add_transition('fall_asleep', 'IDLE', 'SLEEP')
+        self.machine.add_transition('run_auto', 'IDLE', 'AUTO_RUN')
         self._enter_idle()
 
     def _reset_animation(self):
@@ -37,14 +38,20 @@ class Boy:
 
     def handle_events(self, events):
         changed = False
+        pressed = set()
         for key, down in events:
             if down == (key in self.held):
                 continue
             changed = True
             if down:
                 self.held.add(key)
+                pressed.add(key)
             else:
                 self.held.discard(key)
+        if 'a' in pressed and self.state == 'IDLE':
+            self.direction = -1
+            self.run_auto()
+            return
         if changed:
             self._sync_walk()
 
