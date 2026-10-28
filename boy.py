@@ -25,7 +25,7 @@ class Boy:
         self.machine.get_state('IDLE').add_callback('enter', '_enter_idle')
         self.machine.add_transition('start_walk', ['IDLE', 'SLEEP'], 'WALK')
         self.machine.add_transition('fall_asleep', 'IDLE', 'SLEEP')
-        self.machine.add_transition('run_auto', ['IDLE', 'WALK'], 'AUTO_RUN')
+        self.machine.add_transition('run_auto', ['IDLE', 'WALK', 'SLEEP'], 'AUTO_RUN')
         self._enter_idle()
 
     def _reset_animation(self):
@@ -48,7 +48,7 @@ class Boy:
                 pressed.add(key)
             else:
                 self.held.discard(key)
-        if pressed.intersection({'a', 'd'}) and self.state in ('IDLE', 'WALK'):
+        if pressed.intersection({'a', 'd'}) and self.state in ('IDLE', 'WALK', 'SLEEP'):
             self.direction = 1 if 'd' in pressed else -1
             self.run_auto()
             return
