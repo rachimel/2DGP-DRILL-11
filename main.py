@@ -2,6 +2,9 @@
 from time import perf_counter
 
 import pico2d as p
+import pico2d.pico2d as canvas
+
+from grass import Grass
 
 
 class Game:
@@ -10,7 +13,13 @@ class Game:
 
     def __init__(self):
         p.open_canvas(self.WIDTH, self.HEIGHT, sync=True)
+        if not canvas.renderer:
+            canvas.renderer = canvas.SDL_CreateRenderer(canvas.window, -1, canvas.SDL_RENDERER_SOFTWARE)
+        if not canvas.renderer:
+            p.close_canvas()
+            raise RuntimeError('SDL renderer could not be created')
         self.running = True
+        self.grass = Grass()
 
     def update(self, dt):
         self.last_dt = dt
@@ -28,6 +37,7 @@ class Game:
                 previous = now
                 self.update(dt)
                 p.clear_canvas()
+                self.grass.draw()
                 p.update_canvas()
                 frames += 1
         finally:
