@@ -1,32 +1,36 @@
 @startuml
-title Drill 11 Player State Machine
+title Drill 11 — 플레이어 상태 다이어그램
+state "대기 (IDLE)" as IDLE
+state "걷기 (WALK)" as WALK
+state "수면 (SLEEP)" as SLEEP
+state "자동 달리기 (AUTO_RUN)" as AUTO_RUN
 [*] --> IDLE
-IDLE --> WALK : Left / Right
-WALK --> IDLE : No walking direction
-IDLE --> SLEEP : idle time >= 5 s
-SLEEP --> WALK : Left / Right (wake up)
-IDLE --> AUTO_RUN : A = left / D = right
-WALK --> AUTO_RUN : A / D
-SLEEP --> AUTO_RUN : A / D (wake up)
-AUTO_RUN --> IDLE : auto time >= 5 s AND speed = 0
+IDLE --> WALK : 왼쪽 / 오른쪽 방향키
+WALK --> IDLE : 이동 방향키 입력 없음
+IDLE --> SLEEP : 대기 시간 5초 이상
+SLEEP --> WALK : 방향키 입력으로 기상
+IDLE --> AUTO_RUN : A: 왼쪽 / D: 오른쪽
+WALK --> AUTO_RUN : A / D 입력
+SLEEP --> AUTO_RUN : A / D 입력으로 기상
+AUTO_RUN --> IDLE : 달리기 5초 이상 그리고 속력 0
 note bottom of IDLE
-  8 fps; speed = 0
+  초당 8프레임 · 속력 0
 end note
 note bottom of WALK
-  8 fps; 100 px/s
+  초당 8프레임 · 100픽셀/초
 end note
 note bottom of SLEEP
-  2 fps; face upwards
+  초당 2프레임 · 얼굴은 위쪽
 end note
 note bottom of AUTO_RUN
-  8 fps; scale = 200%
-  Accelerate, then brake; clamp speed to 0
-  Reflect at walls only when moving outwards
-  Reflections keep the timer and braking phase
-  Arrows and extra A / D do not change AUTO_RUN
+  초당 8프레임 · 크기 200%
+  가속 후 감속하고 속력은 0에서 멈춤
+  보이는 몸이 경계 바깥쪽으로 이동할 때만 방향 반전
+  반사해도 경과 시간과 감속 단계는 유지
+  방향키와 추가 A / D 입력은 무시
 end note
 legend bottom
-  Same-frame input: AUTO_RUN first; D over A; Left + Right = neutral.
-  Held arrows after AUTO_RUN must be released and pressed again.
+  같은 프레임의 입력: 자동 달리기 우선, A보다 D 우선, 좌우 동시 입력은 정지.
+  자동 달리기 종료 후 누르고 있던 방향키는 놓았다가 다시 눌러야 함.
 endlegend
 @enduml

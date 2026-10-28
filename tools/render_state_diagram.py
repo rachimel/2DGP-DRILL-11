@@ -30,7 +30,7 @@ ROUTES = {
 
 
 def font(size, bold=False):
-    path = Path('C:/Windows/Fonts/segoeuib.ttf' if bold else 'C:/Windows/Fonts/segoeui.ttf')
+    path = Path('C:/Windows/Fonts/malgunbd.ttf' if bold else 'C:/Windows/Fonts/malgun.ttf')
     return ImageFont.truetype(str(path), size) if path.exists() else ImageFont.load_default(size=size)
 
 
@@ -41,7 +41,8 @@ def render():
         raise ValueError('Update the layout when the UML connections change.')
     image = Image.new('RGB', (1600, 1180), '#f5f7fb')
     draw = ImageDraw.Draw(image)
-    draw.text((55, 25), 'Drill 11 / Player State Machine', font=font(34, True), fill='#14243b')
+    title = re.search(r'^title (.+)$', source, re.M).group(1)
+    draw.text((55, 25), title, font=font(34, True), fill='#14243b')
     draw.ellipse((788, 72, 812, 96), fill='#14243b')
     for a, b, label in edges:
         points, position = ROUTES[a, b]
@@ -53,23 +54,25 @@ def render():
         draw.polygon(triangle, fill='#526783')
         if label:
             if a == 'AUTO_RUN':
-                label = label.replace(' AND ', '\nAND ')
+                label = label.replace(' 그리고 ', '\n그리고 ')
             if a == 'WALK' and b == 'IDLE':
-                label = 'No walking\ndirection'
+                label = '이동 방향키\n입력 없음'
             bounds = draw.multiline_textbbox(position, label, font=font(20))
             draw.rectangle((bounds[0] - 5, bounds[1] - 4, bounds[2] + 5, bounds[3] + 4), fill='#f5f7fb')
             draw.multiline_text(position, label, font=font(20), fill='#203853', spacing=6)
     colors = {'IDLE': '#dfeafa', 'WALK': '#ddf3e9', 'SLEEP': '#ece3fa', 'AUTO_RUN': '#fff0d0'}
     for name, rect in BOXES.items():
         draw.rounded_rectangle(rect, radius=18, fill=colors[name], outline='#426180', width=3)
-        draw.text(((rect[0] + rect[2]) / 2, rect[1] + 15), name, anchor='mt', font=font(26, True), fill='#14243b')
+        alias = re.search(rf'^state "(.+)" as {name}$', source, re.M)
+        draw.text(((rect[0] + rect[2]) / 2, rect[1] + 15), alias.group(1) if alias else name,
+                  anchor='mt', font=font(24, True), fill='#14243b')
         match = re.search(rf'note bottom of {name}\n(.*?)\nend note', source, re.S)
         lines = [s.strip() for s in match.group(1).splitlines()] if match else []
         # Long AUTO_RUN notes are displayed below the graph, keeping the state readable.
         content = '\n'.join(lines[:1] if name == 'AUTO_RUN' else lines)
         draw.multiline_text((rect[0] + 18, rect[1] + 58), content, font=font(21), fill='#203853', spacing=7)
         if name == 'AUTO_RUN':
-            draw.multiline_text((rect[0] + 18, rect[1] + 95), 'Accelerate -> brake -> stop\nWalls reflect direction only', font=font(20), fill='#203853', spacing=8)
+            draw.multiline_text((rect[0] + 18, rect[1] + 95), '가속 → 감속 → 정지\n경계에서는 방향만 반전', font=font(20), fill='#203853', spacing=8)
     note = re.search(r'note bottom of AUTO_RUN\n(.*?)\nend note', source, re.S).group(1)
     lines = [s.strip() for s in note.splitlines()][2:]
     legend = re.search(r'legend bottom\n(.*?)\nendlegend', source, re.S).group(1)
