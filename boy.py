@@ -49,6 +49,7 @@ class Boy:
         self.auto_elapsed = 0.0
         self.braking = False
         self.scale = 2.0
+        self._constrain()
 
     def _exit_auto(self):
         self.scale = 1.0
