@@ -66,6 +66,8 @@ class Boy:
             self.rest()
 
     def _sync_walk(self):
+        if self.state == 'AUTO_RUN':
+            return
         direction = int('right' in self.held) - int('left' in self.held)
         if direction:
             self.direction = direction
