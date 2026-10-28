@@ -48,8 +48,8 @@ class Boy:
                 pressed.add(key)
             else:
                 self.held.discard(key)
-        if 'a' in pressed and self.state == 'IDLE':
-            self.direction = -1
+        if pressed.intersection({'a', 'd'}) and self.state == 'IDLE':
+            self.direction = 1 if 'd' in pressed else -1
             self.run_auto()
             return
         if changed:
