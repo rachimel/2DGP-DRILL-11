@@ -45,6 +45,7 @@ class Boy:
     def _enter_auto(self):
         self.speed = self.AUTO_START_SPEED
         self.auto_elapsed = 0.0
+        self.braking = False
         self.scale = 2.0
 
     def _exit_auto(self):
@@ -106,9 +107,12 @@ class Boy:
             self._animate(dt)
 
         elif self.state == 'AUTO_RUN':
+            if self.remaining_auto_time <= self.stopping_time:
+                self.braking = True
+            acceleration = 0.0 if self.braking else self.AUTO_ACCEL
             self.auto_elapsed += dt
-            self.x += self.direction * (self.speed * dt + 0.5 * self.AUTO_ACCEL * dt * dt)
-            self.speed += self.AUTO_ACCEL * dt
+            self.x += self.direction * (self.speed * dt + 0.5 * acceleration * dt * dt)
+            self.speed += acceleration * dt
             self._animate(dt)
         elif self.state == 'IDLE':
             self.idle_elapsed += dt
