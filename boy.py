@@ -75,6 +75,9 @@ class Boy:
             if self.idle_elapsed >= 5.0:
                 self.fall_asleep()
 
+        elif self.state == 'SLEEP':
+            self._animate(dt, fps=2)
+
     def draw(self):
         import pico2d as p
         if self.image is None:
