@@ -28,6 +28,7 @@ class Boy:
         self.machine.add_transition('fall_asleep', 'IDLE', 'SLEEP')
         self.machine.add_transition('run_auto', ['IDLE', 'WALK', 'SLEEP'], 'AUTO_RUN')
         self.machine.get_state('AUTO_RUN').add_callback('enter', '_enter_auto')
+        self.machine.get_state('AUTO_RUN').add_callback('exit', '_exit_auto')
         self._enter_idle()
 
     def _reset_animation(self):
@@ -42,6 +43,9 @@ class Boy:
         self.speed = self.AUTO_START_SPEED
         self.auto_elapsed = 0.0
         self.scale = 2.0
+
+    def _exit_auto(self):
+        self.scale = 1.0
 
     def handle_events(self, events):
         changed = False
