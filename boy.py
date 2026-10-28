@@ -22,7 +22,7 @@ class Boy:
                                initial='IDLE', auto_transitions=False)
         self.machine.add_transition('rest', ['WALK', 'AUTO_RUN'], 'IDLE')
         self.machine.get_state('IDLE').add_callback('enter', '_enter_idle')
-        self.machine.add_transition('start_walk', 'IDLE', 'WALK')
+        self.machine.add_transition('start_walk', ['IDLE', 'SLEEP'], 'WALK')
         self.machine.add_transition('fall_asleep', 'IDLE', 'SLEEP')
         self._enter_idle()
 
@@ -52,7 +52,7 @@ class Boy:
         direction = int('right' in self.held) - int('left' in self.held)
         if direction:
             self.direction = direction
-            if self.state == 'IDLE':
+            if self.state in ('IDLE', 'SLEEP'):
                 self.start_walk()
         elif self.state == 'WALK':
             self.rest()
