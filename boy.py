@@ -1,5 +1,5 @@
 """Player model, state machine and rendering."""
-from math import pi
+from math import isfinite, pi
 from pathlib import Path
 
 from transitions import Machine
@@ -120,7 +120,7 @@ class Boy:
                 distance = self.speed * step + 0.5 * self.AUTO_ACCEL * step * step
                 self.speed += self.AUTO_ACCEL * step
             else:
-                step = min(dt, self.stopping_time) if self.speed > 1e-9 else dt
+                step = min(dt, self.stopping_time if self.speed > 1e-9 else self.remaining_auto_time)
                 distance = self.speed * step - 0.5 * self.AUTO_DECEL * step * step if self.speed > 1e-9 else 0.0
                 self.speed = max(0.0, self.speed - self.AUTO_DECEL * step)
                 if self.speed < 1e-9:
@@ -162,6 +162,8 @@ class Boy:
             self.direction = -1
 
     def update(self, dt):
+        if not isfinite(dt) or dt < 0:
+            raise ValueError('Frame delta must be finite and nonnegative')
         if self.state == 'WALK':
             self.speed = self.WALK_SPEED
             self.x += self.direction * self.speed * dt
@@ -170,10 +172,12 @@ class Boy:
         elif self.state == 'AUTO_RUN':
             self._advance_auto(dt)
         elif self.state == 'IDLE':
-            self.idle_elapsed += dt
-            self._animate(dt)
+            step = min(dt, max(0.0, 5.0 - self.idle_elapsed))
+            self.idle_elapsed += step
+            self._animate(step)
             if self.idle_elapsed >= 5.0:
                 self.fall_asleep()
+                self._animate(dt - step, fps=2)
 
         elif self.state == 'SLEEP':
             self._animate(dt, fps=2)
