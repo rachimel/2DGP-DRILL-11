@@ -1,22 +1,23 @@
 @startuml
 title Drill 11 — 플레이어 상태 다이어그램
 state "대기 (IDLE)" as IDLE
-state "걷기 (WALK)" as WALK
+state "달리기 (RUN)" as RUN
 state "수면 (SLEEP)" as SLEEP
 state "자동 달리기 (AUTO_RUN)" as AUTO_RUN
 [*] --> IDLE
-IDLE --> WALK : 왼쪽 / 오른쪽 방향키
-WALK --> IDLE : 이동 방향키 입력 없음
+IDLE --> RUN : 왼쪽 / 오른쪽 방향키
+RUN --> IDLE : 이동 방향키 입력 없음
 IDLE --> SLEEP : 대기 시간 5초 이상
-SLEEP --> WALK : 방향키 입력으로 기상
+SLEEP --> RUN : 방향키 입력으로 기상
 IDLE --> AUTO_RUN : A: 왼쪽 / D: 오른쪽
-WALK --> AUTO_RUN : A / D 입력
+RUN --> AUTO_RUN : A / D 입력
 SLEEP --> AUTO_RUN : A / D 입력으로 기상
 AUTO_RUN --> IDLE : 달리기 5초 이상 그리고 속력 0
+AUTO_RUN --> RUN : 방향키 입력으로 수동 달리기
 note bottom of IDLE
   초당 8프레임 · 속력 0
 end note
-note bottom of WALK
+note bottom of RUN
   초당 8프레임 · 100픽셀/초
 end note
 note bottom of SLEEP
@@ -27,7 +28,7 @@ note bottom of AUTO_RUN
   가속 후 감속하고 속력은 0에서 멈춤
   보이는 몸이 경계 바깥쪽으로 이동할 때만 방향 반전
   반사해도 경과 시간과 감속 단계는 유지
-  방향키와 추가 A / D 입력은 무시
+  방향키 입력은 수동 달리기로 전환, 추가 A / D 입력은 무시
 end note
 legend bottom
   같은 프레임의 입력: 자동 달리기 우선, A보다 D 우선, 좌우 동시 입력은 정지.

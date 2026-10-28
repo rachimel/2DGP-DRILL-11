@@ -47,13 +47,13 @@ class PlayerTests(unittest.TestCase):
         boy.update(.001)
         self.assertEqual((boy.state, boy.speed, boy.scale), ('IDLE', 0, 1))
 
-    def test_auto_ignores_arrows_and_extra_auto_keys(self):
+    def test_auto_ignores_extra_auto_keys(self):
         boy = Boy()
         boy.handle_events([('d', True)])
         boy.update(.25)
         snapshot = (boy.direction, boy.speed, boy.auto_elapsed, boy.frame_time)
-        boy.handle_events([('left', True), ('a', True), ('d', True), ('right', True)])
-        boy.handle_events([('right', False), ('d', False)])
+        boy.handle_events([('a', True), ('d', True)])
+        boy.handle_events([('d', False)])
         self.assertEqual((boy.direction, boy.speed, boy.auto_elapsed, boy.frame_time), snapshot)
 
     def test_boundaries_keep_inward_direction_and_idle_facing(self):
@@ -127,7 +127,7 @@ class PlayerTests(unittest.TestCase):
             self.assertEqual(boy.state, 'SLEEP')
             key = 'left' if cycle % 2 else 'right'
             boy.handle_events([(key, True)])
-            self.assertEqual(boy.state, 'WALK')
+            self.assertEqual(boy.state, 'RUN')
             self.assertEqual((boy.frame, boy.frame_time), (0, 0))
             boy.update(.2)
             boy.handle_events([(key, False)])
@@ -149,7 +149,7 @@ class PlayerTests(unittest.TestCase):
         self.assertEqual(boy.state, 'IDLE')
         boy.update(.2)
         boy.handle_events([('left', False), ('left', True)])
-        self.assertEqual((boy.state, boy.direction), ('WALK', -1))
+        self.assertEqual((boy.state, boy.direction), ('RUN', -1))
 
     def test_state_changes_start_animation_at_zero(self):
         boy = Boy()

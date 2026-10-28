@@ -12,20 +12,21 @@ from PIL import Image, ImageDraw, ImageFont
 ROOT = Path(__file__).resolve().parents[1]
 BOXES = {
     'IDLE': (660, 155, 940, 275),
-    'WALK': (1160, 425, 1460, 545),
+    'RUN': (1160, 425, 1460, 545),
     'SLEEP': (140, 425, 440, 545),
     'AUTO_RUN': (590, 775, 1010, 965),
 }
 ROUTES = {
     ('[*]', 'IDLE'): ([(800, 95), (800, 155)], (815, 110)),
-    ('IDLE', 'WALK'): ([(940, 195), (1310, 195), (1310, 425)], (1040, 160)),
-    ('WALK', 'IDLE'): ([(1160, 465), (1050, 465), (1050, 245), (940, 245)], (1060, 300)),
+    ('IDLE', 'RUN'): ([(940, 195), (1310, 195), (1310, 425)], (1040, 160)),
+    ('RUN', 'IDLE'): ([(1160, 465), (1050, 465), (1050, 245), (940, 245)], (1060, 300)),
     ('IDLE', 'SLEEP'): ([(660, 195), (290, 195), (290, 425)], (325, 160)),
-    ('SLEEP', 'WALK'): ([(440, 495), (1160, 495)], (630, 455)),
+    ('SLEEP', 'RUN'): ([(440, 495), (1160, 495)], (630, 455)),
     ('IDLE', 'AUTO_RUN'): ([(800, 275), (800, 775)], (815, 650)),
-    ('WALK', 'AUTO_RUN'): ([(1310, 545), (1310, 870), (1010, 870)], (1170, 745)),
+    ('RUN', 'AUTO_RUN'): ([(1310, 545), (1310, 870), (1010, 870)], (1170, 745)),
     ('SLEEP', 'AUTO_RUN'): ([(290, 545), (290, 870), (590, 870)], (305, 745)),
     ('AUTO_RUN', 'IDLE'): ([(590, 820), (510, 820), (510, 320), (730, 320), (730, 275)], (515, 585)),
+    ('AUTO_RUN', 'RUN'): ([(1010, 920), (1510, 920), (1510, 505), (1460, 505)], (1220, 945)),
 }
 
 
@@ -55,12 +56,12 @@ def render():
         if label:
             if a == 'AUTO_RUN':
                 label = label.replace(' 그리고 ', '\n그리고 ')
-            if a == 'WALK' and b == 'IDLE':
+            if a == 'RUN' and b == 'IDLE':
                 label = '이동 방향키\n입력 없음'
             bounds = draw.multiline_textbbox(position, label, font=font(20))
             draw.rectangle((bounds[0] - 5, bounds[1] - 4, bounds[2] + 5, bounds[3] + 4), fill='#f5f7fb')
             draw.multiline_text(position, label, font=font(20), fill='#203853', spacing=6)
-    colors = {'IDLE': '#dfeafa', 'WALK': '#ddf3e9', 'SLEEP': '#ece3fa', 'AUTO_RUN': '#fff0d0'}
+    colors = {'IDLE': '#dfeafa', 'RUN': '#ddf3e9', 'SLEEP': '#ece3fa', 'AUTO_RUN': '#fff0d0'}
     for name, rect in BOXES.items():
         draw.rounded_rectangle(rect, radius=18, fill=colors[name], outline='#426180', width=3)
         alias = re.search(rf'^state "(.+)" as {name}$', source, re.M)

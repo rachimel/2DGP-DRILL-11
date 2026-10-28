@@ -11,7 +11,7 @@ class Boy:
     SCREEN_WIDTH = 800
     BASE_SIZE = 100
     GROUND_Y = 60
-    WALK_SPEED = 100.0
+    RUN_SPEED = 100.0
     AUTO_START_SPEED = 100.0
     AUTO_ACCEL = 100.0
     AUTO_DECEL = 200.0
@@ -23,17 +23,17 @@ class Boy:
         self.frame = 0
         self.frame_time = 0.0
         self.held = set()
-        self.blocked_walk = set()
+        self.blocked_run = set()
         self.scale = 1.0
         self.image = None
-        self.machine = Machine(model=self, states=['IDLE', 'WALK', 'SLEEP', 'AUTO_RUN'],
+        self.machine = Machine(model=self, states=['IDLE', 'RUN', 'SLEEP', 'AUTO_RUN'],
                                initial='IDLE', auto_transitions=False,
                                after_state_change='_reset_animation')
-        self.machine.add_transition('rest', ['WALK', 'AUTO_RUN'], 'IDLE')
+        self.machine.add_transition('rest', ['RUN', 'AUTO_RUN'], 'IDLE')
         self.machine.get_state('IDLE').add_callback('enter', '_enter_idle')
-        self.machine.add_transition('start_walk', ['IDLE', 'SLEEP'], 'WALK')
+        self.machine.add_transition('start_run', ['IDLE', 'SLEEP', 'AUTO_RUN'], 'RUN')
         self.machine.add_transition('fall_asleep', 'IDLE', 'SLEEP')
-        self.machine.add_transition('run_auto', ['IDLE', 'WALK', 'SLEEP'], 'AUTO_RUN')
+        self.machine.add_transition('run_auto', ['IDLE', 'RUN', 'SLEEP'], 'AUTO_RUN')
         self.machine.get_state('AUTO_RUN').add_callback('enter', '_enter_auto')
         self.machine.get_state('AUTO_RUN').add_callback('exit', '_exit_auto')
         self._enter_idle()
@@ -56,7 +56,7 @@ class Boy:
 
     def _exit_auto(self):
         self.scale = 1.0
-        self.blocked_walk = self.held.intersection({'left', 'right'})
+        self.blocked_run = self.held.intersection({'left', 'right'})
 
     def handle_events(self, events):
         changed = False
@@ -70,30 +70,38 @@ class Boy:
                 pressed.add(key)
             else:
                 self.held.discard(key)
-                self.blocked_walk.discard(key)
-        if pressed.intersection({'a', 'd'}) and self.state in ('IDLE', 'WALK', 'SLEEP'):
+                self.blocked_run.discard(key)
+        if self.state == 'AUTO_RUN' and pressed.intersection({'left', 'right'}):
+            self.direction = 1 if 'right' in pressed else -1
+            self.start_run()
+            self.blocked_run.clear()
+            self.speed = self.RUN_SPEED
+            self._sync_run()
+            self._constrain()
+            return
+        if pressed.intersection({'a', 'd'}) and self.state in ('IDLE', 'RUN', 'SLEEP'):
             self.direction = 1 if 'd' in pressed else -1
             self.run_auto()
             return
         if changed:
-            self._sync_walk()
+            self._sync_run()
 
     def clear_inputs(self):
         self.held.clear()
-        self.blocked_walk.clear()
-        if self.state == 'WALK':
+        self.blocked_run.clear()
+        if self.state == 'RUN':
             self.rest()
 
-    def _sync_walk(self):
+    def _sync_run(self):
         if self.state == 'AUTO_RUN':
             return
-        active = self.held - self.blocked_walk
+        active = self.held - self.blocked_run
         direction = int('right' in active) - int('left' in active)
         if direction:
             self.direction = direction
             if self.state in ('IDLE', 'SLEEP'):
-                self.start_walk()
-        elif self.state == 'WALK':
+                self.start_run()
+        elif self.state == 'RUN':
             self.rest()
 
     def _animate(self, dt, fps=8):
@@ -171,8 +179,8 @@ class Boy:
     def update(self, dt):
         if not isfinite(dt) or dt < 0:
             raise ValueError('Frame delta must be finite and nonnegative')
-        if self.state == 'WALK':
-            self.speed = self.WALK_SPEED
+        if self.state == 'RUN':
+            self.speed = self.RUN_SPEED
             self.x += self.direction * self.speed * dt
             self._animate(dt)
 
@@ -209,6 +217,6 @@ class Boy:
 
     @property
     def sprite_row(self):
-        if self.state in ('WALK', 'AUTO_RUN'):
+        if self.state in ('RUN', 'AUTO_RUN'):
             return 101 if self.direction == 1 else 1
         return 301 if self.direction == 1 else 201
