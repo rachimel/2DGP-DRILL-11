@@ -32,12 +32,15 @@ class Boy:
                 self.held.add(key)
             else:
                 self.held.discard(key)
-            if key in ('left', 'right') and down and self.state in ('IDLE', 'WALK'):
-                self.direction = -1 if key == 'left' else 1
-                if self.state != 'WALK':
-                    self.start_walk()
+        self._sync_walk()
 
-        if self.state == 'WALK' and not self.held.intersection({'left', 'right'}):
+    def _sync_walk(self):
+        direction = int('right' in self.held) - int('left' in self.held)
+        if direction:
+            self.direction = direction
+            if self.state == 'IDLE':
+                self.start_walk()
+        elif self.state == 'WALK':
             self.rest()
 
     def update(self, dt):
