@@ -1,4 +1,6 @@
 """Drill 11 game loop. Run with the game2d Python environment."""
+from time import perf_counter
+
 import pico2d as p
 
 
@@ -10,13 +12,21 @@ class Game:
         p.open_canvas(self.WIDTH, self.HEIGHT, sync=True)
         self.running = True
 
+    def update(self, dt):
+        self.last_dt = dt
+
     def run(self, max_frames=None):
         frames = 0
+        previous = perf_counter()
         try:
             while self.running and (max_frames is None or frames < max_frames):
                 for event in p.get_events():
                     if event.type == p.SDL_QUIT or (event.type == p.SDL_KEYDOWN and event.key == p.SDLK_ESCAPE):
                         self.running = False
+                now = perf_counter()
+                dt = now - previous
+                previous = now
+                self.update(dt)
                 p.clear_canvas()
                 p.update_canvas()
                 frames += 1
