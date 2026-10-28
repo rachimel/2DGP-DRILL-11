@@ -20,6 +20,7 @@ class Boy:
         self.frame = 0
         self.frame_time = 0.0
         self.held = set()
+        self.blocked_walk = set()
         self.scale = 1.0
         self.image = None
         self.machine = Machine(model=self, states=['IDLE', 'WALK', 'SLEEP', 'AUTO_RUN'],
@@ -50,6 +51,7 @@ class Boy:
 
     def _exit_auto(self):
         self.scale = 1.0
+        self.blocked_walk = self.held.intersection({'left', 'right'})
 
     def handle_events(self, events):
         changed = False
@@ -63,6 +65,7 @@ class Boy:
                 pressed.add(key)
             else:
                 self.held.discard(key)
+                self.blocked_walk.discard(key)
         if pressed.intersection({'a', 'd'}) and self.state in ('IDLE', 'WALK', 'SLEEP'):
             self.direction = 1 if 'd' in pressed else -1
             self.run_auto()
@@ -72,13 +75,15 @@ class Boy:
 
     def clear_inputs(self):
         self.held.clear()
+        self.blocked_walk.clear()
         if self.state == 'WALK':
             self.rest()
 
     def _sync_walk(self):
         if self.state == 'AUTO_RUN':
             return
-        direction = int('right' in self.held) - int('left' in self.held)
+        active = self.held - self.blocked_walk
+        direction = int('right' in active) - int('left' in active)
         if direction:
             self.direction = direction
             if self.state in ('IDLE', 'SLEEP'):
@@ -122,6 +127,11 @@ class Boy:
             self.auto_elapsed += step
             self._animate(step)
             dt -= step
+            if self.auto_elapsed >= self.AUTO_DURATION and self.speed == 0.0:
+                self.rest()
+                if dt > 0:
+                    self.update(dt)
+                return
 
     def update(self, dt):
         if self.state == 'WALK':
