@@ -125,7 +125,7 @@ class Boy:
                 self.speed = max(0.0, self.speed - self.AUTO_DECEL * step)
                 if self.speed < 1e-9:
                     self.speed = 0.0
-            self.x += self.direction * distance
+            self._move_auto(distance)
             self.auto_elapsed += step
             self._animate(step)
             dt -= step
@@ -139,6 +139,19 @@ class Boy:
     def horizontal_bounds(self):
         half = self.BASE_SIZE * self.scale / 2
         return half, self.SCREEN_WIDTH - half
+
+    def _move_auto(self, distance):
+        # Fold the travelled position across both walls; preserve overshoot.
+        left, right = self.horizontal_bounds
+        span = right - left
+        phase = (self.x - left + self.direction * distance) % (2 * span)
+        self.x = left + (phase if phase <= span else 2 * span - phase)
+        if phase == 0:
+            self.direction = 1
+        elif phase == span:
+            self.direction = -1
+        elif phase > span:
+            self.direction *= -1
 
     def _constrain(self):
         left, right = self.horizontal_bounds
