@@ -13,6 +13,7 @@ class Boy:
         self.x = 400.0
         self.direction = 1
         self.frame = 0
+        self.frame_time = 0.0
         self.held = set()
         self.scale = 1.0
         self.image = None
@@ -53,15 +54,22 @@ class Boy:
         elif self.state == 'WALK':
             self.rest()
 
+    def _animate(self, dt, fps=8):
+        total = self.frame_time + dt
+        steps = int((total + 1e-12) * fps)
+        self.frame = (self.frame + steps) % 8
+        self.frame_time = max(0.0, total - steps / fps)
+
     def update(self, dt):
         if self.state == 'WALK':
             self.speed = self.WALK_SPEED
             self.x += self.direction * self.speed * dt
+            self._animate(dt)
 
     def draw(self):
         import pico2d as p
         if self.image is None:
             self.image = p.load_image(str(Path(__file__).with_name('animation_sheet.png')))
-        row = 301 if self.direction == 1 else 201
+        row = (101 if self.direction == 1 else 1) if self.state == 'WALK' else (301 if self.direction == 1 else 201)
         self.image.clip_draw(1 + self.frame * 100, row, 100, 100,
                              self.x, self.GROUND_Y + 50, 100, 100)
