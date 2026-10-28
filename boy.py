@@ -16,6 +16,12 @@ class Boy:
         self.image = None
         self.machine = Machine(model=self, states=['IDLE', 'WALK', 'SLEEP', 'AUTO_RUN'],
                                initial='IDLE', auto_transitions=False)
+        self.machine.add_transition('rest', ['WALK', 'AUTO_RUN'], 'IDLE')
+        self.machine.get_state('IDLE').add_callback('enter', '_enter_idle')
+        self._enter_idle()
+
+    def _enter_idle(self):
+        self.speed = 0.0
 
     def handle_events(self, events):
         self.last_events = events
