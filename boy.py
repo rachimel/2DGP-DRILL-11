@@ -95,6 +95,10 @@ class Boy:
     def remaining_auto_time(self):
         return max(0.0, self.AUTO_DURATION - self.auto_elapsed)
 
+    @property
+    def stopping_time(self):
+        return self.speed / self.AUTO_DECEL
+
     def update(self, dt):
         if self.state == 'WALK':
             self.speed = self.WALK_SPEED
