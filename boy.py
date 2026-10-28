@@ -141,7 +141,7 @@ class Boy:
 
     def _constrain(self):
         left, right = self.horizontal_bounds
-        self.x = max(left, self.x)
+        self.x = min(right, max(left, self.x))
 
     def update(self, dt):
         if self.state == 'WALK':
