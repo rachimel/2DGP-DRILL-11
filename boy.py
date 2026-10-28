@@ -27,12 +27,22 @@ class Boy:
         self.speed = 0.0
 
     def handle_events(self, events):
+        changed = False
         for key, down in events:
+            if down == (key in self.held):
+                continue
+            changed = True
             if down:
                 self.held.add(key)
             else:
                 self.held.discard(key)
-        self._sync_walk()
+        if changed:
+            self._sync_walk()
+
+    def clear_inputs(self):
+        self.held.clear()
+        if self.state == 'WALK':
+            self.rest()
 
     def _sync_walk(self):
         direction = int('right' in self.held) - int('left' in self.held)

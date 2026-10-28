@@ -22,6 +22,7 @@ class Game:
         self.running = True
         self.grass = Grass()
         self.boy = Boy()
+        self._had_focus = False
 
     def update(self, dt):
         self.boy.update(dt)
@@ -38,6 +39,11 @@ class Game:
                         self.running = False
                     elif event.type in (p.SDL_KEYDOWN, p.SDL_KEYUP) and event.key in keys:
                         inputs.append((keys[event.key], event.type == p.SDL_KEYDOWN))
+                focused = bool(canvas.SDL_GetWindowFlags(canvas.window) & canvas.SDL_WINDOW_INPUT_FOCUS)
+                if self._had_focus and not focused:
+                    self.boy.clear_inputs()
+                    inputs.clear()
+                self._had_focus = focused
                 self.boy.handle_events(inputs)
                 now = perf_counter()
                 dt = now - previous
