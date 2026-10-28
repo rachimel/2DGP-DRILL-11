@@ -26,6 +26,7 @@ class Boy:
 
     def _enter_idle(self):
         self.speed = 0.0
+        self.idle_elapsed = 0.0
 
     def handle_events(self, events):
         changed = False
@@ -67,6 +68,7 @@ class Boy:
             self._animate(dt)
 
         elif self.state == 'IDLE':
+            self.idle_elapsed += dt
             self._animate(dt)
 
     def draw(self):
