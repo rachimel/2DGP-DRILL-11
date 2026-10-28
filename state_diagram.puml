@@ -1,12 +1,32 @@
 @startuml
 title Drill 11 Player State Machine
 [*] --> IDLE
-IDLE --> WALK
-WALK --> IDLE
-IDLE --> SLEEP
-SLEEP --> WALK
-IDLE --> AUTO_RUN
-WALK --> AUTO_RUN
-SLEEP --> AUTO_RUN
-AUTO_RUN --> IDLE
+IDLE --> WALK : Left / Right
+WALK --> IDLE : No walking direction
+IDLE --> SLEEP : idle time >= 5 s
+SLEEP --> WALK : Left / Right (wake up)
+IDLE --> AUTO_RUN : A = left / D = right
+WALK --> AUTO_RUN : A / D
+SLEEP --> AUTO_RUN : A / D (wake up)
+AUTO_RUN --> IDLE : auto time >= 5 s AND speed = 0
+note bottom of IDLE
+  8 fps; speed = 0
+end note
+note bottom of WALK
+  8 fps; 100 px/s
+end note
+note bottom of SLEEP
+  2 fps; face upwards
+end note
+note bottom of AUTO_RUN
+  8 fps; scale = 200%
+  Accelerate, then brake; clamp speed to 0
+  Reflect at walls only when moving outwards
+  Reflections keep the timer and braking phase
+  Arrows and extra A / D do not change AUTO_RUN
+end note
+legend bottom
+  Same-frame input: AUTO_RUN first; D over A; Left + Right = neutral.
+  Held arrows after AUTO_RUN must be released and pressed again.
+endlegend
 @enduml
