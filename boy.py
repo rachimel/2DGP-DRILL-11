@@ -97,6 +97,7 @@ class Boy:
         elif self.state == 'AUTO_RUN':
             self.auto_elapsed += dt
             self.x += self.direction * self.speed * dt
+            self._animate(dt)
         elif self.state == 'IDLE':
             self.idle_elapsed += dt
             self._animate(dt)
@@ -110,7 +111,7 @@ class Boy:
         import pico2d as p
         if self.image is None:
             self.image = p.load_image(str(Path(__file__).with_name('animation_sheet.png')))
-        row = (101 if self.direction == 1 else 1) if self.state == 'WALK' else (301 if self.direction == 1 else 201)
+        row = (101 if self.direction == 1 else 1) if self.state in ('WALK', 'AUTO_RUN') else (301 if self.direction == 1 else 201)
         sleeping = self.state == 'SLEEP'
         angle = self.direction * pi / 2 if sleeping else 0.0
         size = self.BASE_SIZE * self.scale
