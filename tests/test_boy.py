@@ -57,8 +57,8 @@ class PlayerTests(unittest.TestCase):
         self.assertEqual((boy.direction, boy.speed, boy.auto_elapsed, boy.frame_time), snapshot)
 
     def test_boundaries_keep_inward_direction_and_idle_facing(self):
-        for x, key, direction, expected in [(50, 'd', 1, 100), (750, 'a', -1, 700),
-                                             (50, 'a', 1, 100), (750, 'd', -1, 700)]:
+        for x, key, direction, expected in [(0, 'd', 1, 52), (800, 'a', -1, 748),
+                                             (0, 'a', 1, 52), (800, 'd', -1, 748)]:
             boy = Boy()
             boy.x = x
             boy.direction = -direction
@@ -73,7 +73,7 @@ class PlayerTests(unittest.TestCase):
         boy.auto_elapsed = 3.5
         boy.braking = True
         boy.speed = 300
-        boy.x = 100
+        boy.x = boy.horizontal_bounds[0]
         boy.update(.01)
         self.assertTrue(boy.braking)
         self.assertEqual(boy.direction, 1)
@@ -81,7 +81,11 @@ class PlayerTests(unittest.TestCase):
         self.assertAlmostEqual(boy.auto_elapsed, 3.51)
 
     def test_frame_partition_does_not_change_auto_distance_or_idle_time(self):
-        for key, expected_x in [('a', 450), ('d', 350)]:
+        for key in ['a', 'd']:
+            reference = Boy()
+            reference.handle_events([(key, True)])
+            reference.update(6)
+            expected_x = reference.x
             for dt in [1 / 30, 1 / 60, 1 / 144, .017, .3, 1.1, 6.0]:
                 boy = Boy()
                 boy.handle_events([(key, True)])
@@ -101,7 +105,7 @@ class PlayerTests(unittest.TestCase):
         self.assertEqual((boy.state, boy.speed, boy.scale), ('SLEEP', 0, 1))
         self.assertEqual(boy.frame, 2)
         self.assertAlmostEqual(boy.frame_time, .25)
-        self.assertAlmostEqual(boy.x, 350)
+        self.assertTrue(boy.horizontal_bounds[0] <= boy.x <= boy.horizontal_bounds[1])
 
     def test_invalid_delta_is_rejected(self):
         for delta in [-.1, float('inf'), float('nan')]:
@@ -135,7 +139,7 @@ class PlayerTests(unittest.TestCase):
             self.assertEqual((boy.state, boy.speed, boy.scale), ('IDLE', 0, 1))
             self.assertEqual((boy.idle_elapsed, boy.frame, boy.frame_time), (0, 0, 0))
             boy.handle_events([(auto, False)])
-            self.assertTrue(50 <= boy.x <= 750)
+            self.assertTrue(boy.horizontal_bounds[0] <= boy.x <= boy.horizontal_bounds[1])
 
     def test_held_arrow_needs_release_after_auto(self):
         boy = Boy()

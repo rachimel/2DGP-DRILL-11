@@ -11,4 +11,6 @@ class Grass:
         self.image = p.load_image(str(Path(__file__).with_name('grass.png')))
 
     def draw(self):
-        self.image.draw(400, self.TOP / 2, 800, self.TOP)
+        # Native 802x62 image has a 1px side border and 2px transparent top.
+        # Its actual grass surface is therefore y=60, matching Boy.GROUND_Y.
+        self.image.draw(400, 31, 802, 62)

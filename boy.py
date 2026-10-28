@@ -1,11 +1,13 @@
 """Player model, state machine and rendering."""
 from math import isfinite, pi
 from pathlib import Path
+import json
 
 from transitions import Machine
 
 
 class Boy:
+    SPRITE_BOUNDS = json.loads(Path(__file__).with_name('sprite_bounds.json').read_text(encoding='utf-8'))
     SCREEN_WIDTH = 800
     BASE_SIZE = 100
     GROUND_Y = 60
@@ -49,6 +51,7 @@ class Boy:
         self.auto_elapsed = 0.0
         self.braking = False
         self.scale = 2.0
+        self._reset_animation()
         self._constrain()
 
     def _exit_auto(self):
@@ -116,11 +119,12 @@ class Boy:
                 if switch_in <= 1e-12:
                     self.braking = True
                     continue
-                step = min(dt, switch_in)
+                step = min(dt, switch_in, 0.125 - self.frame_time)
                 distance = self.speed * step + 0.5 * self.AUTO_ACCEL * step * step
                 self.speed += self.AUTO_ACCEL * step
             else:
-                step = min(dt, self.stopping_time if self.speed > 1e-9 else self.remaining_auto_time)
+                step = min(dt, 0.125 - self.frame_time,
+                           self.stopping_time if self.speed > 1e-9 else self.remaining_auto_time)
                 distance = self.speed * step - 0.5 * self.AUTO_DECEL * step * step if self.speed > 1e-9 else 0.0
                 self.speed = max(0.0, self.speed - self.AUTO_DECEL * step)
                 if self.speed < 1e-9:
@@ -128,6 +132,7 @@ class Boy:
             self._move_auto(distance)
             self.auto_elapsed += step
             self._animate(step)
+            self._constrain()
             dt -= step
             if self.auto_elapsed >= self.AUTO_DURATION and self.speed == 0.0:
                 self.rest()
@@ -137,7 +142,9 @@ class Boy:
 
     @property
     def horizontal_bounds(self):
-        half = self.BASE_SIZE * self.scale / 2
+        left, top, right, bottom = self.SPRITE_BOUNDS[str(self.sprite_row)][self.frame]
+        visible_width = bottom - top if self.state == 'SLEEP' else right - left
+        half = visible_width * self.scale / 2
         return half, self.SCREEN_WIDTH - half
 
     def _move_auto(self, distance):
@@ -188,10 +195,20 @@ class Boy:
         import pico2d as p
         if self.image is None:
             self.image = p.load_image(str(Path(__file__).with_name('animation_sheet.png')))
-        row = (101 if self.direction == 1 else 1) if self.state in ('WALK', 'AUTO_RUN') else (301 if self.direction == 1 else 201)
+        row = self.sprite_row
+        left, top, right, bottom = self.SPRITE_BOUNDS[str(row)][self.frame]
         sleeping = self.state == 'SLEEP'
         angle = self.direction * pi / 2 if sleeping else 0.0
-        size = self.BASE_SIZE * self.scale
-        y = self.GROUND_Y + (20 if sleeping else 37) * self.scale
-        self.image.clip_composite_draw(1 + self.frame * 100, row, 100, 100,
-                                      angle, '', self.x, y, size, size)
+        width = (right - left) * self.scale
+        height = (bottom - top) * self.scale
+        visible_height = width if sleeping else height
+        y = self.GROUND_Y + visible_height / 2
+        self.image.clip_composite_draw(1 + self.frame * 100 + left, row + 100 - bottom,
+                                      right - left, bottom - top,
+                                      angle, '', self.x, y, width, height)
+
+    @property
+    def sprite_row(self):
+        if self.state in ('WALK', 'AUTO_RUN'):
+            return 101 if self.direction == 1 else 1
+        return 301 if self.direction == 1 else 201
