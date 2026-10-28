@@ -40,6 +40,7 @@ class Boy:
 
     def _enter_auto(self):
         self.speed = self.AUTO_START_SPEED
+        self.auto_elapsed = 0.0
 
     def handle_events(self, events):
         changed = False
@@ -89,6 +90,7 @@ class Boy:
             self._animate(dt)
 
         elif self.state == 'AUTO_RUN':
+            self.auto_elapsed += dt
             self.x += self.direction * self.speed * dt
         elif self.state == 'IDLE':
             self.idle_elapsed += dt
