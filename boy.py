@@ -9,6 +9,7 @@ class Boy:
     BASE_SIZE = 100
     GROUND_Y = 60
     WALK_SPEED = 100.0
+    AUTO_START_SPEED = 100.0
 
     def __init__(self):
         self.x = 400.0
@@ -26,6 +27,7 @@ class Boy:
         self.machine.add_transition('start_walk', ['IDLE', 'SLEEP'], 'WALK')
         self.machine.add_transition('fall_asleep', 'IDLE', 'SLEEP')
         self.machine.add_transition('run_auto', ['IDLE', 'WALK', 'SLEEP'], 'AUTO_RUN')
+        self.machine.get_state('AUTO_RUN').add_callback('enter', '_enter_auto')
         self._enter_idle()
 
     def _reset_animation(self):
@@ -35,6 +37,9 @@ class Boy:
     def _enter_idle(self):
         self.speed = 0.0
         self.idle_elapsed = 0.0
+
+    def _enter_auto(self):
+        self.speed = self.AUTO_START_SPEED
 
     def handle_events(self, events):
         changed = False
@@ -81,6 +86,8 @@ class Boy:
             self.x += self.direction * self.speed * dt
             self._animate(dt)
 
+        elif self.state == 'AUTO_RUN':
+            self.x += self.direction * self.speed * dt
         elif self.state == 'IDLE':
             self.idle_elapsed += dt
             self._animate(dt)
