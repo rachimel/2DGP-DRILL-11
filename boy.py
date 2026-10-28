@@ -13,6 +13,9 @@ class Boy:
         self.scale = 1.0
         self.image = None
 
+    def handle_events(self, events):
+        self.last_events = events
+
     def draw(self):
         import pico2d as p
         if self.image is None:

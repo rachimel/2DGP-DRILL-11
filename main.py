@@ -31,9 +31,14 @@ class Game:
         previous = perf_counter()
         try:
             while self.running and (max_frames is None or frames < max_frames):
+                inputs = []
+                keys = {p.SDLK_LEFT: "left", p.SDLK_RIGHT: "right", p.SDLK_a: "a", p.SDLK_d: "d"}
                 for event in p.get_events():
                     if event.type == p.SDL_QUIT or (event.type == p.SDL_KEYDOWN and event.key == p.SDLK_ESCAPE):
                         self.running = False
+                    elif event.type in (p.SDL_KEYDOWN, p.SDL_KEYUP) and event.key in keys:
+                        inputs.append((keys[event.key], event.type == p.SDL_KEYDOWN))
+                self.boy.handle_events(inputs)
                 now = perf_counter()
                 dt = now - previous
                 previous = now
