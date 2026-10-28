@@ -144,6 +144,8 @@ class Boy:
         self.x = min(right, max(left, self.x))
         if self.state == 'AUTO_RUN' and self.x <= left and self.direction < 0:
             self.direction = 1
+        elif self.state == 'AUTO_RUN' and self.x >= right and self.direction > 0:
+            self.direction = -1
 
     def update(self, dt):
         if self.state == 'WALK':
