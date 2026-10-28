@@ -18,13 +18,17 @@ class Boy:
                                initial='IDLE', auto_transitions=False)
         self.machine.add_transition('rest', ['WALK', 'AUTO_RUN'], 'IDLE')
         self.machine.get_state('IDLE').add_callback('enter', '_enter_idle')
+        self.machine.add_transition('start_walk', 'IDLE', 'WALK')
         self._enter_idle()
 
     def _enter_idle(self):
         self.speed = 0.0
 
     def handle_events(self, events):
-        self.last_events = events
+        for key, down in events:
+            if key == 'left' and down and self.state == 'IDLE':
+                self.direction = -1
+                self.start_walk()
 
     def draw(self):
         import pico2d as p
