@@ -5,6 +5,7 @@ import pico2d as p
 import pico2d.pico2d as canvas
 
 from grass import Grass
+from boy import Boy
 
 
 class Game:
@@ -20,6 +21,7 @@ class Game:
             raise RuntimeError('SDL renderer could not be created')
         self.running = True
         self.grass = Grass()
+        self.boy = Boy()
 
     def update(self, dt):
         self.last_dt = dt
@@ -38,6 +40,7 @@ class Game:
                 self.update(dt)
                 p.clear_canvas()
                 self.grass.draw()
+                self.boy.draw()
                 p.update_canvas()
                 frames += 1
         finally:
