@@ -66,6 +66,9 @@ class Boy:
             self.x += self.direction * self.speed * dt
             self._animate(dt)
 
+        elif self.state == 'IDLE':
+            self._animate(dt)
+
     def draw(self):
         import pico2d as p
         if self.image is None:
