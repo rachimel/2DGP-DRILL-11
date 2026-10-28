@@ -7,6 +7,7 @@ from transitions import Machine
 class Boy:
     BASE_SIZE = 100
     GROUND_Y = 60
+    WALK_SPEED = 100.0
 
     def __init__(self):
         self.x = 400.0
@@ -29,6 +30,11 @@ class Boy:
             if key in ('left', 'right') and down and self.state == 'IDLE':
                 self.direction = -1 if key == 'left' else 1
                 self.start_walk()
+
+    def update(self, dt):
+        if self.state == 'WALK':
+            self.speed = self.WALK_SPEED
+            self.x += self.direction * self.speed * dt
 
     def draw(self):
         import pico2d as p

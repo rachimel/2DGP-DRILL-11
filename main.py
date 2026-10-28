@@ -24,7 +24,7 @@ class Game:
         self.boy = Boy()
 
     def update(self, dt):
-        self.last_dt = dt
+        self.boy.update(dt)
 
     def run(self, max_frames=None):
         frames = 0
