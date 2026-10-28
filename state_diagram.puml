@@ -1,0 +1,12 @@
+@startuml
+title Drill 11 Player State Machine
+[*] --> IDLE
+IDLE --> WALK
+WALK --> IDLE
+IDLE --> SLEEP
+SLEEP --> WALK
+IDLE --> AUTO_RUN
+WALK --> AUTO_RUN
+SLEEP --> AUTO_RUN
+AUTO_RUN --> IDLE
+@enduml
