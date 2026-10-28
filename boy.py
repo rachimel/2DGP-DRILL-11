@@ -100,6 +100,27 @@ class Boy:
     def stopping_time(self):
         return self.speed / self.AUTO_DECEL
 
+    def _advance_auto(self, dt):
+        # Split a frame at the acceleration/braking boundary and at standstill.
+        while dt > 1e-12:
+            if not self.braking:
+                switch_in = max(0.0, (self.remaining_auto_time - self.stopping_time)
+                                / (1 + self.AUTO_ACCEL / self.AUTO_DECEL))
+                if switch_in <= 1e-12:
+                    self.braking = True
+                    continue
+                step = min(dt, switch_in)
+                distance = self.speed * step + 0.5 * self.AUTO_ACCEL * step * step
+                self.speed += self.AUTO_ACCEL * step
+            else:
+                step = min(dt, self.stopping_time) if self.speed > 1e-9 else dt
+                distance = self.speed * step - 0.5 * self.AUTO_DECEL * step * step if self.speed > 1e-9 else 0.0
+                self.speed -= self.AUTO_DECEL * step if self.speed > 1e-9 else 0.0
+            self.x += self.direction * distance
+            self.auto_elapsed += step
+            self._animate(step)
+            dt -= step
+
     def update(self, dt):
         if self.state == 'WALK':
             self.speed = self.WALK_SPEED
@@ -107,13 +128,7 @@ class Boy:
             self._animate(dt)
 
         elif self.state == 'AUTO_RUN':
-            if self.remaining_auto_time <= self.stopping_time:
-                self.braking = True
-            acceleration = 0.0 if self.braking else self.AUTO_ACCEL
-            self.auto_elapsed += dt
-            self.x += self.direction * (self.speed * dt + 0.5 * acceleration * dt * dt)
-            self.speed += acceleration * dt
-            self._animate(dt)
+            self._advance_auto(dt)
         elif self.state == 'IDLE':
             self.idle_elapsed += dt
             self._animate(dt)
