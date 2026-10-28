@@ -6,6 +6,7 @@ from transitions import Machine
 
 
 class Boy:
+    SCREEN_WIDTH = 800
     BASE_SIZE = 100
     GROUND_Y = 60
     WALK_SPEED = 100.0
@@ -132,6 +133,11 @@ class Boy:
                 if dt > 0:
                     self.update(dt)
                 return
+
+    @property
+    def horizontal_bounds(self):
+        half = self.BASE_SIZE * self.scale / 2
+        return half, self.SCREEN_WIDTH - half
 
     def update(self, dt):
         if self.state == 'WALK':
