@@ -115,7 +115,9 @@ class Boy:
             else:
                 step = min(dt, self.stopping_time) if self.speed > 1e-9 else dt
                 distance = self.speed * step - 0.5 * self.AUTO_DECEL * step * step if self.speed > 1e-9 else 0.0
-                self.speed -= self.AUTO_DECEL * step if self.speed > 1e-9 else 0.0
+                self.speed = max(0.0, self.speed - self.AUTO_DECEL * step)
+                if self.speed < 1e-9:
+                    self.speed = 0.0
             self.x += self.direction * distance
             self.auto_elapsed += step
             self._animate(step)
