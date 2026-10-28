@@ -10,6 +10,9 @@ class Boy:
     GROUND_Y = 60
     WALK_SPEED = 100.0
     AUTO_START_SPEED = 100.0
+    AUTO_ACCEL = 100.0
+    AUTO_DECEL = 200.0
+    AUTO_DURATION = 5.0
 
     def __init__(self):
         self.x = 400.0
@@ -96,7 +99,8 @@ class Boy:
 
         elif self.state == 'AUTO_RUN':
             self.auto_elapsed += dt
-            self.x += self.direction * self.speed * dt
+            self.x += self.direction * (self.speed * dt + 0.5 * self.AUTO_ACCEL * dt * dt)
+            self.speed += self.AUTO_ACCEL * dt
             self._animate(dt)
         elif self.state == 'IDLE':
             self.idle_elapsed += dt
