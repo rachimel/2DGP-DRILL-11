@@ -19,12 +19,17 @@ class Boy:
         self.scale = 1.0
         self.image = None
         self.machine = Machine(model=self, states=['IDLE', 'WALK', 'SLEEP', 'AUTO_RUN'],
-                               initial='IDLE', auto_transitions=False)
+                               initial='IDLE', auto_transitions=False,
+                               after_state_change='_reset_animation')
         self.machine.add_transition('rest', ['WALK', 'AUTO_RUN'], 'IDLE')
         self.machine.get_state('IDLE').add_callback('enter', '_enter_idle')
         self.machine.add_transition('start_walk', ['IDLE', 'SLEEP'], 'WALK')
         self.machine.add_transition('fall_asleep', 'IDLE', 'SLEEP')
         self._enter_idle()
+
+    def _reset_animation(self):
+        self.frame = 0
+        self.frame_time = 0.0
 
     def _enter_idle(self):
         self.speed = 0.0
