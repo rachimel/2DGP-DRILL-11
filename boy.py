@@ -91,6 +91,10 @@ class Boy:
         self.frame = (self.frame + steps) % 8
         self.frame_time = max(0.0, total - steps / fps)
 
+    @property
+    def remaining_auto_time(self):
+        return max(0.0, self.AUTO_DURATION - self.auto_elapsed)
+
     def update(self, dt):
         if self.state == 'WALK':
             self.speed = self.WALK_SPEED
